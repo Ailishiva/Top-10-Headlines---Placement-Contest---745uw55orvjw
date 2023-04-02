@@ -4,12 +4,24 @@ import '../styles/App.css';
 const App = () => {
   const [category, setCategory] = useState("general");
   const [newsData, setNewsData] = useState([]);
-  const [loading, setLoading] = useState();
-
+  const [loading, setLoading] = useState(false);
+  const apiKey = "513497e00664c584513b69c99fdf5833";
+  useEffect(()=>{
+    async function data(){
+      setLoading(true)
+      let api = `https://gnews.io/api/v4/top-headlines?category=${category}&apikey=${apiKey}&max=10%lang=en`
+      let res = await fetch(api)
+      let resData = await res.json();
+      setLoading(false)
+      setNewsData(resData.articles);
+    }
+    data();
+  },[category])
+  // console.log(newsData)
   return (
     <div id="main">
       <h1 className='heading'>Top 10 {category} news.</h1>
-      <select value={category}>
+      <select value={category} onChange={(e)=>setCategory(e.target.value)}>
         <option value="general">General</option>
         <option value="business">Business</option>
         <option value="sports">Sports</option>
@@ -18,19 +30,22 @@ const App = () => {
         <option value="entertainment">Entertainment</option>
         <option value="science">Science</option>
       </select>
-      <p className='loader'>Loading...</p>
-      <ol>
-        <li key="">
-          <img className='news-img' src="" alt=""/>
+      {loading && <p className='loader'>Loading...</p>}
+      {!loading && <ol>
+        {newsData.map((data,i)=>{
+          return (<li key={i}>
+          <img className='news-img' src={data.image} alt={data.title}/>
           <section className='new-title-content-author'>
-            <h3 className='news-title'>news title</h3>
+            <h3 className='news-title'>{data.title}</h3>
             <section className='new-content-author'>
-              <p className='news-description'>news description</p>
-              <p className='news-source'><strong>Source:</strong> source name</p>
+              <p className='news-description'>{data.description}</p>
+              <p className='news-source'><strong>Source:</strong> {data.source.name}</p>
             </section>
           </section>
-        </li>
-      </ol>
+          </li>)
+        })
+       }
+      </ol>}
     </div>
   )
 }
